@@ -19,6 +19,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // Mandatory setups
+
         flutterEngine = FlutterEngine(this)
 
         flutterEngine.dartExecutor.executeDartEntrypoint(
@@ -29,24 +32,31 @@ class MainActivity : AppCompatActivity() {
                 .getInstance()
                 .put(FLUTTER_ENGINE_ID, flutterEngine)
 
+        val methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
+
+        //
+
         val json = JSONObject()
 
-        json.put("amount", 500)
-        json.put("count", 4)
-        json.put("percent", 100)
+        json.put("x", 20)
+        json.put("y", 5)
 
-        val methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
         methodChannel.setMethodCallHandler { call, _ ->
-            Log.i("Hello",call.method)
-            if(call.method == "getCalculatedResult"){
-                Log.i("Hello",call.arguments.toString())
+
+            // All the results will be here the developer needs to check from which method is coming from.
+            Log.i("Flutter_SDK",call.method)
+            if(call.method == "add"){
+                Log.i("Flutter_SDK",call.arguments.toString())
             }
         }
 
         val button = findViewById<Button>(R.id.mybutton)
         button.setOnClickListener{
-            Log.i("Hello","Clicked")
-            methodChannel.invokeMethod("getCalculatedResult", json.toString())
+            Log.i("Flutter_SDK","Clicked")
+            // Developer can call methods from sdk anywhere.
+            // But he will not get the result at that call instantly
+            // and neither he can chain the listener to wait for result there.
+            methodChannel.invokeMethod("add", json.toString())
         }
     }
 }
